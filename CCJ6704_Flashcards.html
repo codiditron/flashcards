@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCJ6704 Midterm Flashcards</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0f1117;
+    color: #e8e8f0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px 40px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 24px;
+    width: 100%;
+    max-width: 700px;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    color: #c8b8ff;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+
+  header p {
+    font-size: 0.82rem;
+    color: #7a7a9a;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* Chapter filter */
+  .chapter-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 20px;
+    max-width: 700px;
+    width: 100%;
+  }
+
+  .ch-btn {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid #2a2a3e;
+    background: #1a1a2e;
+    color: #9090b0;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .ch-btn.active {
+    background: #3a2a6e;
+    border-color: #7050cf;
+    color: #c8b8ff;
+  }
+
+  .ch-btn:hover { border-color: #7050cf; color: #c8b8ff; }
+
+  /* Progress bar */
+  .progress-row {
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .progress-bar-wrap {
+    flex: 1;
+    height: 4px;
+    background: #2a2a3e;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #7050cf, #c8b8ff);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  .progress-label {
+    font-size: 0.78rem;
+    color: #7a7a9a;
+    white-space: nowrap;
+    min-width: 70px;
+    text-align: right;
+  }
+
+  /* Card */
+  .card-wrapper {
+    width: 100%;
+    max-width: 700px;
+    perspective: 1200px;
+    cursor: pointer;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    width: 100%;
+    min-height: 260px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card.flipped { transform: rotateX(180deg); }
+
+  .card-face {
+    position: absolute;
+    width: 100%;
+    min-height: 260px;
+    backface-visibility: hidden;
+    border-radius: 16px;
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .card-front {
+    background: linear-gradient(135deg, #1e1e30 0%, #16162a 100%);
+    border: 1px solid #2e2e4a;
+  }
+
+  .card-back {
+    background: linear-gradient(135deg, #1a1030 0%, #12102a 100%);
+    border: 1px solid #4a3a7a;
+    transform: rotateX(180deg);
+  }
+
+  .card-chapter {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #7050cf;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .card-label {
+    font-size: 0.72rem;
+    color: #7a7a9a;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  .card-front .card-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.1rem, 3vw, 1.45rem);
+    line-height: 1.5;
+    color: #e8e8f0;
+  }
+
+  .card-back .card-text {
+    font-size: clamp(0.88rem, 2.5vw, 1rem);
+    line-height: 1.65;
+    color: #d0d0e8;
+  }
+
+  .flip-hint {
+    font-size: 0.7rem;
+    color: #4a4a6a;
+    margin-top: 16px;
+    text-align: center;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .btn {
+    padding: 10px 22px;
+    border-radius: 10px;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: #7050cf;
+    color: #fff;
+  }
+  .btn-primary:hover { background: #8060df; transform: translateY(-1px); }
+  .btn-primary:disabled { background: #3a2a5a; color: #6060a0; cursor: default; transform: none; }
+
+  .btn-secondary {
+    background: #1e1e30;
+    color: #9090b0;
+    border: 1px solid #2e2e4a;
+  }
+  .btn-secondary:hover { border-color: #7050cf; color: #c8b8ff; }
+
+  /* Score buttons */
+  .score-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .score-row.visible { opacity: 1; pointer-events: all; }
+
+  .score-btn {
+    flex: 1;
+    padding: 8px 4px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .score-btn.got-it { background: #1a4a2a; color: #4caf7a; border: 1px solid #2a5a3a; }
+  .score-btn.almost { background: #3a3a1a; color: #c0b040; border: 1px solid #4a4a2a; }
+  .score-btn.missed { background: #4a1a1a; color: #cf6060; border: 1px solid #5a2a2a; }
+  .score-btn:hover { filter: brightness(1.2); transform: translateY(-1px); }
+
+  /* Stats */
+  .stats-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .stat {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #7a7a9a;
+  }
+  .stat span {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .stat .got { color: #4caf7a; }
+  .stat .almost { color: #c0b040; }
+  .stat .missed { color: #cf6060; }
+
+  /* Shuffle toggle */
+  .options-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+  .toggle-label {
+    font-size: 0.78rem;
+    color: #7a7a9a;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+  .toggle-label input { accent-color: #7050cf; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CCJ6704 Midterm Flashcards</h1>
+  <p>Chapters 1–8 · Withrow (2016) · Exam June 19–21</p>
+</header>
+
+<div class="chapter-filter" id="chapterFilter"></div>
+
+<div class="progress-row">
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="progress-label" id="progressLabel">0 / 0</div>
+</div>
+
+<div class="stats-row">
+  <div class="stat"><span class="got" id="gotCount">0</span>Got it ✓</div>
+  <div class="stat"><span class="almost" id="almostCount">0</span>Almost</div>
+  <div class="stat"><span class="missed" id="missedCount">0</span>Missed</div>
+</div>
+
+<div class="options-row">
+  <label class="toggle-label">
+    <input type="checkbox" id="shuffleToggle" checked> Shuffle cards
+  </label>
+</div>
+
+<div class="card-wrapper" id="cardWrapper" onclick="flipCard()">
+  <div class="card" id="card">
+    <div class="card-face card-front">
+      <div class="card-chapter" id="cardChapter"></div>
+      <div class="card-label">QUESTION</div>
+      <div class="card-text" id="cardFront"></div>
+      <div class="flip-hint">Tap to flip</div>
+    </div>
+    <div class="card-face card-back">
+      <div class="card-chapter" id="cardChapterBack"></div>
+      <div class="card-label">ANSWER</div>
+      <div class="card-text" id="cardBack"></div>
+    </div>
+  </div>
+</div>
+
+<div class="score-row" id="scoreRow">
+  <button class="score-btn got-it" onclick="score('got')">✓ Got it</button>
+  <button class="score-btn almost" onclick="score('almost')">~ Almost</button>
+  <button class="score-btn missed" onclick="score('missed')">✗ Missed</button>
+</div>
+
+<div class="controls">
+  <button class="btn btn-secondary" id="prevBtn" onclick="prevCard()">← Prev</button>
+  <button class="btn btn-primary" id="nextBtn" onclick="nextCard()">Next →</button>
+  <button class="btn btn-secondary" onclick="resetDeck()">↺ Reset</button>
+</div>
+
+<script>
+const ALL_CARDS = [
+  // ─── CHAPTER 1: The Research Practice ───
+  {ch:"Ch 1", q:"What are research methods?", a:"The tools, techniques, and procedures that researchers use to ask and answer questions."},
+  {ch:"Ch 1", q:"What does 'research' mean as a VERB?", a:"To follow a logical process that uses concepts, principles, and techniques to produce knowledge."},
+  {ch:"Ch 1", q:"What does 'research' mean as a NOUN?", a:"A collection of information that represents what we know about a particular topic."},
+  {ch:"Ch 1", q:"Why is research in the social sciences more challenging than the physical sciences?", a:"The concepts that social scientists study are more difficult to measure, and the findings are more difficult to interpret."},
+  {ch:"Ch 1", q:"Name the 4 types of research by purpose.", a:"1) Exploratory — learns about new/emerging social phenomena\n2) Descriptive — describes social trends/conditions\n3) Explanatory — attempts to find a cause for social trends\n4) Evaluation — assesses efficiency/effectiveness of programs, policies, or processes."},
+  {ch:"Ch 1", q:"What is EXPLORATORY research?", a:"Research that is often necessary when we know very little about a new or emerging social trend or phenomenon."},
+  {ch:"Ch 1", q:"What is DESCRIPTIVE research?", a:"Research that documents existing social conditions or trends — describes social behavior or phenomena."},
+  {ch:"Ch 1", q:"What is EXPLANATORY research?", a:"Research that attempts to find a cause for social trends and phenomena; explains why individuals or groups behave the way they do."},
+  {ch:"Ch 1", q:"What is EVALUATION research?", a:"Research that utilizes a wide range of methods to assess the efficiency and effectiveness of programs, policies, or processes."},
+  {ch:"Ch 1", q:"What is PURE (basic) research?", a:"Research conducted initially for the sole purpose of expanding the body of knowledge and advancing theory."},
+  {ch:"Ch 1", q:"What is APPLIED (action) research?", a:"Research conducted primarily to address a specific issue or solve a particular problem."},
+  {ch:"Ch 1", q:"What is PEER REVIEW?", a:"A collaborative process whereby researchers knowledgeable about a particular subject are asked to review and comment on another researcher's work and recommend whether it should be published. It enhances the overall quality of research."},
+  {ch:"Ch 1", q:"What are the 4 ALTERNATIVES to research (non-scientific ways of knowing)?", a:"1) Authority — some experts are wrong\n2) Tradition or custom — societies change, so do customs\n3) Common sense — varies between people/groups\n4) Media — may not be objective, valid, or sensitive to context."},
+  {ch:"Ch 1", q:"Why is relying on authority, tradition, common sense, or media risky?", a:"There is no substitute for good research in the pursuit of reliable knowledge — these alternatives may not provide verifiable facts."},
+  {ch:"Ch 1", q:"Where is research found? (6 sources)", a:"Academic/scholarly journals, research monographs, textbooks, newspapers & magazines, trade publications, corporate research reports, legislative/policy actions, databases."},
+  {ch:"Ch 1", q:"Why do researchers conduct research? (7 reasons)", a:"To expand the body of knowledge, establish professional credentials, inform legal and policy decisions, address social problems, develop new products/services, advance social/political agendas, improve professional practice."},
+  {ch:"Ch 1", q:"What is 'best practices' research?", a:"Descriptions of programs or processes that have proven successful in multiple organizations or contexts. Its value depends on the particular demands of an organization — what works for one agency may not work for another."},
+  {ch:"Ch 1", q:"Who is the most prolific funding source for criminal justice research in the U.S.?", a:"The United States government, primarily through bureaus in the US Department of Justice."},
+
+  // ─── CHAPTER 2: The Research Process ───
+  {ch:"Ch 2", q:"What are the 3 characteristics of the research process?", a:"1) Generally LINEAR — steps usually completed in a certain order\n2) Internally CYCLICAL — researchers often revisit previously completed steps\n3) Externally CYCLICAL — findings often produce additional questions for future researchers."},
+  {ch:"Ch 2", q:"List the 11 steps in the research process.", a:"1) Ask a research question\n2) Conduct a literature review\n3) Refine the research question\n4) Define the concepts\n5) Create the measures\n6) Design a method\n7) Collect the data\n8) Analyze the data\n9) Interpret the results\n10) Communicate the findings\n11) Ask another question."},
+  {ch:"Ch 2", q:"What are the 4 objectives of the research process?", a:"1) Answer research questions\n2) Resolve disagreements among researchers\n3) Fill gaps within the body of knowledge\n4) To produce opportunities for more research."},
+  {ch:"Ch 2", q:"What is a LITERATURE REVIEW?", a:"A summary of what previous researchers have learned about a particular topic. It is a researcher's ethical responsibility to locate, understand, and communicate what previous researchers have learned."},
+  {ch:"Ch 2", q:"What is PYRAMIDING?", a:"An effective technique for locating research and determining when you have 'enough' information. Uses bibliographies of research articles you find to locate additional sources. Commonly cited researchers/studies are indicators of quality or authoritative research."},
+  {ch:"Ch 2", q:"What are the 5 sources of information for a literature review, and their key advantages/disadvantages?", a:"Books: good background, may be obsolete\nScholarly journals: objective, reliable, current; but narrow coverage\nNewspapers/magazines: timely; methodology/context may be missing\nInternet: timely and accessible; may not be objective\nExperts: practical and timely; may be biased."},
+  {ch:"Ch 2", q:"What is CONCEPTUALIZATION? (Step 4)", a:"The process by which researchers define the concepts in their hypotheses. Difficult in social sciences because concepts are more difficult to quantify. It determines how researchers will actually measure concepts."},
+  {ch:"Ch 2", q:"What is OPERATIONALIZATION? (Step 5)", a:"The process by which a researcher decides how to actually measure the variables as they are defined conceptually. The operational measures must include all dimensions of the conceptual definition."},
+  {ch:"Ch 2", q:"What happens in Step 6 (Design a Method)?", a:"The researcher determines the process to gather the data necessary to answer the research question. There is no 'one best way' — all methods have advantages and disadvantages. The key is to ensure the method will produce sufficient data in the appropriate form to answer the question."},
+  {ch:"Ch 2", q:"What are A PRIORI ASSUMPTIONS? (Step 8)", a:"Assumptions that establish what the data must reveal for a researcher to confirm the hypothesis. Researchers code, enter, and clean data before running statistical tests or performing analyses."},
+  {ch:"Ch 2", q:"What does it mean to 'overreach the data'? (Step 9)", a:"When findings are interpreted to mean more than they actually do. Research findings should be interpreted within the context they arise and are subject to the limitations of available data."},
+  {ch:"Ch 2", q:"What is the research question? (Step 1 rule)", a:"Research questions should be actual questions that can be answered, NOT mere statements that make some claim. They often begin with casual observations, and from the curiosity of the researcher, research questions emerge."},
+  {ch:"Ch 2", q:"What does the literature review enable researchers to do? (Step 3 link)", a:"It enables researchers to refine their research questions, identify a theory related to their research questions, and propose a hypothesis that predicts the answer."},
+
+  // ─── CHAPTER 3: Ethical Principles ───
+  {ch:"Ch 3", q:"How many ethical principles guide researchers, according to Withrow?", a:"Seven (7) enduring ethical principles."},
+  {ch:"Ch 3", q:"What is Principle 1: DO NO HARM?", a:"Neither the research process nor the researcher should do anything that would put another person at risk of physical harm, psychological harm, or legal harm. Researchers should develop contingencies to mitigate harm and may even abandon harmful projects."},
+  {ch:"Ch 3", q:"What is Principle 2: ENSURE PRIVACY? Name the two types.", a:"Privacy = the right to be left alone. Two types:\n• Confidentiality — researcher knows but agrees not to divulge the identity of research subjects\n• Anonymity — researcher does NOT and CANNOT know the identity of research subjects."},
+  {ch:"Ch 3", q:"What is the difference between CONFIDENTIALITY and ANONYMITY?", a:"Confidentiality: researcher knows the identity but agrees not to reveal it.\nAnonymity: researcher does not and cannot know the identity — stronger protection."},
+  {ch:"Ch 3", q:"What is Principle 3: OBTAIN VOLUNTARY AND INFORMED CONSENT?", a:"Research subjects must consent to participate. Consent must be:\n• Voluntary — subjects are completely free to participate or not without threat\n• Informed — subjects are told what is expected of them and the risks associated with the research."},
+  {ch:"Ch 3", q:"What is Principle 4: GET PERMISSION? What are vulnerable populations?", a:"Researchers must seek and obtain permission to access research subjects. Vulnerable populations — individuals less able to manage their own affairs — include children, the mentally ill, and inmates. Additional safeguards must be in place."},
+  {ch:"Ch 3", q:"What is Principle 5: AVOID SPONSORSHIP BIAS AND SUPPRESSION?", a:"Sponsorship bias — occurs when a sponsor attempts to influence the study's design or interpretation for their own benefit.\nSuppression — occurs when a research sponsor fails to disclose findings that shed unfavorable light on the sponsor's products or services."},
+  {ch:"Ch 3", q:"What is Principle 6: PREVENT MISREPRESENTATION? Define the 4 forms.", a:"Misrepresentation = purposeful lying.\nResearch fraud = extreme misrepresentation; lying about or fabricating data and findings.\nPlagiarism = presenting another person's intellectual property as one's own.\nDeception = lending credibility to an unscrupulously produced research project."},
+  {ch:"Ch 3", q:"What is Principle 7: ENSURE THE SAFETY OF RESEARCHERS?", a:"Extends the 'do no harm' principle to researchers and their assistants. Criminal justice researchers often find themselves in the presence of dangerous people and situations. Researchers should develop contingency plans for safety."},
+  {ch:"Ch 3", q:"What are Institutional Review Boards (IRBs)?", a:"Bodies supported by most universities and research organizations, staffed with experienced researchers, that review proposed research to ensure human subjects will not be harmed. The intensity of review is determined by the potential harm."},
+  {ch:"Ch 3", q:"What are the two levels of IRB review?", a:"Expedited review — when very little potential for harm is anticipated (e.g., an anonymous survey).\nFull review — when the proposed research could cause substantial harm to human subjects (e.g., requesting highly personal information)."},
+  {ch:"Ch 3", q:"When researchers collect data from human subjects, they are bound by what three types of oversight?", a:"1) International treaties\n2) Federal laws and regulations\n3) Institutional procedures."},
+  {ch:"Ch 3", q:"What do codes of ethics do?", a:"Many scholarly, academic, and professional organizations publish codes of ethics that govern the research behavior of their members. These collectively represent the minimum standard of ethical conduct."},
+
+  // ─── CHAPTER 4: Classifying Research ───
+  {ch:"Ch 4", q:"How many commonly used schemes for classifying research are there?", a:"Six (6) commonly used schemes for classifying research."},
+  {ch:"Ch 4", q:"Why do we classify research? (3 reasons)", a:"1) To enhance our ability to access the literature efficiently\n2) To enable researchers to evaluate research\n3) To understand the limitations of a research project."},
+  {ch:"Ch 4", q:"What is a PARADIGM?", a:"A general organizing framework for social theory and empirical research — a lens through which a person views social phenomena. It reflects a researcher's assumptions about reality. There are three commonly used paradigms."},
+  {ch:"Ch 4", q:"What are the 3 paradigms of research?", a:"1) Positivist — relies on empirical observations; may attempt to establish causal relationships between variables\n2) Interpretive — attempts to measure human behavior by developing an understanding of its meaning\n3) Critical — assumes research is not value free; every researcher brings their own biases into the research process."},
+  {ch:"Ch 4", q:"What is QUANTITATIVE research?", a:"Research that measures variables numerically. Assumes the social world can be understood objectively and measured accordingly."},
+  {ch:"Ch 4", q:"What is QUALITATIVE research?", a:"Research that examines variables in a natural social setting and probes the qualitative meaning of these variables. Assumes the social world is best understood subjectively, from the perspective of research subjects."},
+  {ch:"Ch 4", q:"What is the TIME DIMENSION of research?", a:"The span of time during which the data were collected. There are two commonly used time dimensions: cross-sectional and longitudinal."},
+  {ch:"Ch 4", q:"What is CROSS-SECTIONAL research?", a:"Research that uses data collected at a single point in time — a 'snapshot.'"},
+  {ch:"Ch 4", q:"What is LONGITUDINAL research? Name the 3 types.", a:"Research that uses data collected over an extended time frame. Three types:\n• Trend studies — same data at different times from DIFFERENT samples of the same population\n• Panel studies — same data at different times from the SAME sample\n• Cohort studies — data from groups of individuals that share a common characteristic or experience."},
+  {ch:"Ch 4", q:"What are TREND studies?", a:"Longitudinal studies that collect the same data at different times from different samples of the same population."},
+  {ch:"Ch 4", q:"What are PANEL studies?", a:"Longitudinal studies that collect the same data at different times from the SAME sample."},
+  {ch:"Ch 4", q:"What are COHORT studies?", a:"Longitudinal studies that collect data from groups of individuals that share a common characteristic or experience."},
+  {ch:"Ch 4", q:"What is DEDUCTIVE reasoning?", a:"Begins with a theory and collects data (makes observations) that either supports or falsifies the theory. Goes from GENERAL → SPECIFIC (theory first, then data)."},
+  {ch:"Ch 4", q:"What is INDUCTIVE reasoning?", a:"Begins with data (or observations) and then seeks to develop a theory that explains that behavior. Goes from SPECIFIC → GENERAL (data first, then theory)."},
+  {ch:"Ch 4", q:"What is the UNIT OF ANALYSIS?", a:"The 'what' or 'whom' from which a researcher collects data. A unit of analysis can be an individual, a group, an organization, or even an entire nation. It determines the research classification."},
+  {ch:"Ch 4", q:"What is an ECOLOGICAL FALLACY?", a:"Occurs when a researcher predicts individual behavior based solely on observations gathered from a group of similar individuals."},
+  {ch:"Ch 4", q:"What is REDUCTIONISM (individualist fallacy)?", a:"Occurs when a researcher predicts group behavior based solely on an observation of an individual from that group."},
+  {ch:"Ch 4", q:"What is the quality of research based on?", a:"How well the researcher adhered to generally accepted research methods — NOT solely on its classification. No single classification is 'better' than another."},
+
+  // ─── CHAPTER 5: Causality ───
+  {ch:"Ch 5", q:"How many requirements (causal rules) must be met before a causal relationship can be established?", a:"Three (3) requirements — ALL three must be met before a researcher can prove one variable causes another."},
+  {ch:"Ch 5", q:"What is the 1st causal rule: TEMPORAL ORDER?", a:"The cause must precede the effect. The variable alleged to be the cause must happen first. If X is the cause of Y, then X must have happened first."},
+  {ch:"Ch 5", q:"What is the 2nd causal rule: CORRELATION?", a:"The variables in a causal relationship must be related to one another — they must change together. A change in one variable must be associated with a change in another. Correlations can be positive or negative."},
+  {ch:"Ch 5", q:"What is the 3rd causal rule: LACK OF PLAUSIBLE ALTERNATIVE EXPLANATIONS?", a:"The researcher must eliminate all other reasonable causes for the change, leaving only the variable alleged to be the cause. This is often the most difficult requirement to meet."},
+  {ch:"Ch 5", q:"What is a POSITIVE correlation?", a:"When X and Y move in the SAME direction: when X increases, Y also increases — OR when X decreases, Y also decreases."},
+  {ch:"Ch 5", q:"What is a NEGATIVE (inverse) correlation?", a:"When X and Y move in OPPOSITE directions: when X increases, Y decreases — OR when X decreases, Y increases."},
+  {ch:"Ch 5", q:"What does SPURIOUS mean?", a:"When a researcher falsely proposes a causal relationship. Spurious simply means FALSE. Researchers commit this error because they have failed to confirm one or more of the three causal rules."},
+  {ch:"Ch 5", q:"What type of research most commonly attempts to establish causality?", a:"Explanatory research — researchers attempt to determine the cause(s) of behavior."},
+
+  // ─── CHAPTER 6: Measurement ───
+  {ch:"Ch 6", q:"What is MEASUREMENT?", a:"The process by which social science researchers determine how to assess the social phenomena they study. It is more difficult in social science than physical science because social concepts are more challenging to define."},
+  {ch:"Ch 6", q:"What is CONCEPTUALIZATION (in measurement)?", a:"The process by which researchers develop precise definitions of the concepts they study. The measurement process begins with conceptualization."},
+  {ch:"Ch 6", q:"What is OPERATIONALIZATION (in measurement)?", a:"The process by which a researcher decides how to actually measure the variables as they are defined conceptually. It begins after concepts have been defined."},
+  {ch:"Ch 6", q:"What is a VARIABLE?", a:"Anything that varies — any characteristic of an individual, group, organization, or social phenomenon that changes. All variables have attributes."},
+  {ch:"Ch 6", q:"What are ATTRIBUTES?", a:"The levels or variations of a variable — the different characteristics or values a variable can take on. Must be both exhaustive and mutually exclusive."},
+  {ch:"Ch 6", q:"What are the 4 LEVELS OF MEASUREMENT? (NOIR)", a:"1) Nominal\n2) Ordinal\n3) Interval\n4) Ratio\nHigher levels are more precise; you can convert down but NOT up."},
+  {ch:"Ch 6", q:"What is NOMINAL level measurement?", a:"The LOWEST level. Variables are merely names or labels — categories that CANNOT be arranged in any logical order or sequence. Examples: race, ethnicity, gender, type of crime. (CJ example: races of adult offenders)"},
+  {ch:"Ch 6", q:"What is ORDINAL level measurement?", a:"Variables are names or labels that CAN be rank ordered — arranged in logical order. But the distances between attributes are unequal. Examples: race results (1st, 2nd, 3rd place). (CJ example: reoffending risk categories)"},
+  {ch:"Ch 6", q:"What is INTERVAL level measurement?", a:"Variables can be names or labels AND rank ordered AND have EQUAL DISTANCES between attributes. BUT no absolute/true zero. Examples: height, weight, age, education in years. (CJ example: education in years)"},
+  {ch:"Ch 6", q:"What is RATIO level measurement?", a:"The HIGHEST level. Has all properties of interval PLUS an ABSOLUTE ZERO. Examples: income, temperature. (CJ example: annual income in dollars)"},
+  {ch:"Ch 6", q:"Levels of measurement comparison table (key properties)", a:"Nominal: Name only ✓ | Rank ✗ | Equal distance ✗ | Absolute zero ✗\nOrdinal: Name ✓ | Rank ✓ | Equal distance ✗ | Absolute zero ✗\nInterval: Name ✓ | Rank ✓ | Equal distance ✓ | Absolute zero ✗\nRatio: Name ✓ | Rank ✓ | Equal distance ✓ | Absolute zero ✓"},
+  {ch:"Ch 6", q:"Can you convert levels of measurement? Which direction?", a:"You CAN convert a variable from a HIGHER level down to a LOWER level. You CANNOT convert from a lower level up to a higher level."},
+  {ch:"Ch 6", q:"What are DISCRETE variables?", a:"Similar to nominal and ordinal level measures. Have a fixed number of attributes (e.g., gender has exactly 2 attributes)."},
+  {ch:"Ch 6", q:"What are CONTINUOUS variables?", a:"Similar to interval or ratio level variables. Have an almost unlimited number of attributes."},
+  {ch:"Ch 6", q:"What is VALIDITY of a measure?", a:"The ability of a measure to ACCURATELY measure the concept it claims to measure. Are we measuring what we think we're measuring?"},
+  {ch:"Ch 6", q:"What is RELIABILITY of a measure?", a:"The ability of a measure to CONSISTENTLY measure the concept it claims to measure. Does it produce the same results each time?"},
+  {ch:"Ch 6", q:"What are the 4 types of VALIDITY?", a:"1) Face validity — appears valid on its face; makes sense\n2) Criterion/Predictive validity — relates to another, more direct measure of the same concept\n3) Construct validity — corresponds to other variables that are theoretically related\n4) Content validity — includes every dimension of the concept."},
+  {ch:"Ch 6", q:"What is FACE VALIDITY?", a:"Refers to whether a measure appears to be valid on its face — whether it makes sense. Example: measuring lifetime criminal behavior using only adult convictions would NOT have face validity because it excludes juvenile convictions."},
+  {ch:"Ch 6", q:"What is CRITERION (PREDICTIVE) VALIDITY?", a:"Refers to the extent to which a measure relates to another, more direct measure of the same concept. Example: asking someone if they've been arrested for a crime and comparing their answer to official arrest records."},
+  {ch:"Ch 6", q:"What is CONSTRUCT VALIDITY?", a:"The extent to which a measure corresponds to other variables that are related to the underlying variable being studied. Example: credit score corresponding to criminal behavior (if there's a theoretical link)."},
+  {ch:"Ch 6", q:"What is CONTENT VALIDITY?", a:"Refers to the degree to which a measure includes EVERY DIMENSION of the concept. Example: measuring social bonds requires capturing marriage, parenthood, and friendships — not just one dimension."},
+  {ch:"Ch 6", q:"What are the 4 types of RELIABILITY?", a:"1) Test–Retest — administer twice to same group, check if results are similar\n2) Inter-rater — two+ observers measure the same thing, compare results\n3) Split half — split measure in half, administer each half to two similar groups\n4) Concurrent (benchmarks/baselines) — compare new measure to a pre-established, accepted measure."},
+  {ch:"Ch 6", q:"What is TEST–RETEST reliability?", a:"Requires a researcher to administer a measure twice to the same group to see if the results are similar. The measure is considered reliable if the results from each administration are similar."},
+  {ch:"Ch 6", q:"What is INTER-RATER reliability?", a:"Ask two or more researchers to observe and measure the same thing. Then compare results to see if they have generally the same impression. If so, the measure is considered reliable."},
+  {ch:"Ch 6", q:"What is SPLIT HALF reliability?", a:"Split a measure in half (or develop a similar measure) and administer each half to two similar groups. The measure is reliable if the results from each half are similar."},
+  {ch:"Ch 6", q:"What is CONCURRENT (BENCHMARKS/BASELINES) reliability?", a:"Assess reliability of a new measure by comparing it to pre-existing benchmarks and baselines. The new measure's results should concur with those of a pre-established, generally accepted measure of the same concept."},
+
+  // ─── CHAPTER 7: Variables & Structure of Research ───
+  {ch:"Ch 7", q:"What is a VARIABLE (Ch 7 definition)?", a:"Any characteristic of an individual, group, organization, or social phenomenon that CHANGES."},
+  {ch:"Ch 7", q:"What is a HYPOTHESIS (Ch 7 definition)?", a:"A predictive statement that alleges a plausible connection between two or more variables. It predicts how a change in one or more variables will cause a change in another variable. All hypotheses contain two or more variables."},
+  {ch:"Ch 7", q:"What are the 3 types of variables?", a:"1) Independent variable — the causal variable; what the researcher predicts will cause change\n2) Dependent variable — the effect; what is predicted to change\n3) Intervening variable — occurs between IV and DV; may change how or even if IV affects DV."},
+  {ch:"Ch 7", q:"What is an INDEPENDENT VARIABLE?", a:"The causal variable — the variable that a researcher predicts will be the CAUSE of a change in another variable. It always happens first (temporal order)."},
+  {ch:"Ch 7", q:"What is a DEPENDENT VARIABLE?", a:"The effect — the variable that a researcher predicts will CHANGE as a result of a change in the independent variable (or set of variables)."},
+  {ch:"Ch 7", q:"Easy way to distinguish IV from DV?", a:"Ask which happens first. The INDEPENDENT variable always happens first. The first causal rule (temporal order) requires the cause (IV) to happen prior to the effect (DV)."},
+  {ch:"Ch 7", q:"What is an INTERVENING VARIABLE?", a:"Any variable that: (1) occurs BETWEEN the independent and dependent variables, AND (2) may change how, or even if, the independent variable affects a dependent variable. Intervening variables INTERVENE in the causal relationship."},
+  {ch:"Ch 7", q:"Example: IV, DV, and intervening variable in domestic abuse research?", a:"Hypothesis: Children who experience domestic abuse are more likely as adults to abuse their domestic partners, UNLESS they develop strong attachments to non-abusive adults.\nIV: Children who experience domestic abuse\nDV: Domestic abusive behavior as an adult\nIntervening: Strong attachments to non-abusive adults."},
+  {ch:"Ch 7", q:"What are ATTRIBUTES of a variable? What two properties must they have?", a:"Attributes are the different characteristics or values a variable can take on. Must be:\n1) Exhaustive — all possible attributes must be included\n2) Mutually exclusive — respondent can pick ONE and only one option."},
+  {ch:"Ch 7", q:"What is EXHAUSTIVENESS of attributes?", a:"The completeness of the list of attributes — all of the possible attributes for each variable must be included. Sometimes an 'other' category is needed."},
+  {ch:"Ch 7", q:"What is MUTUAL EXCLUSIVITY of attributes?", a:"The list of attributes must be distinctive, such that a respondent can pick one, and ONLY one, option."},
+  {ch:"Ch 7", q:"What are the 4 criteria of a good research question?", a:"1) Measurable — concepts should be measurable (quantitatively or qualitatively); avoid ambiguous terms\n2) Unanswered — should address something not yet fully answered (can still replicate)\n3) Feasible — must be practical given money and time constraints\n4) Disinteresting — researcher should be indifferent to outcome; never try to prove anything."},
+  {ch:"Ch 7", q:"What makes a research question DISINTERESTING?", a:"Researchers should be indifferent to the outcome of their research. They should never try to prove anything, but be led by the evidence to the most logical conclusion."},
+  {ch:"Ch 7", q:"What is the ALTERNATIVE HYPOTHESIS (Ha)?", a:"A predictive statement alleging a PLAUSIBLE CONNECTION between two or more variables. This is the hypothesis the researcher wants to confirm as true. For each alternative hypothesis, the researcher must develop a competing null hypothesis."},
+  {ch:"Ch 7", q:"What is the NULL HYPOTHESIS (Ho)?", a:"A predictive statement that alleges NO PLAUSIBLE CONNECTION between two or more variables. It is the exact opposite of the alternative hypothesis."},
+
+  // ─── CHAPTER 8: Sampling ───
+  {ch:"Ch 8", q:"What is SAMPLING?", a:"A scientific technique that allows a researcher to learn something about a population by studying a few members, or a sample, of that population. Without sampling, researchers would not have the time or money to study large populations."},
+  {ch:"Ch 8", q:"What is a POPULATION?", a:"The entire set of individuals or groups that is relevant to a research project."},
+  {ch:"Ch 8", q:"What is a CENSUS?", a:"Collects information from an entire population (as opposed to a sample)."},
+  {ch:"Ch 8", q:"What is a SAMPLE?", a:"Collects information from a group WITHIN a population."},
+  {ch:"Ch 8", q:"What is a SAMPLING FRAME?", a:"A list of the individual components (members, cases, elements) of a population. The terms members, cases, and elements are used interchangeably to describe individual components."},
+  {ch:"Ch 8", q:"What is a SAMPLING PLAN?", a:"The exact process used to select the sample."},
+  {ch:"Ch 8", q:"What is the CENTRAL LIMIT THEOREM?", a:"Proposes that numerous samples from a population will produce about the same result. The results when plotted on a graph will be normally distributed (cluster around the middle). This is the scientific basis of sampling."},
+  {ch:"Ch 8", q:"What is BIAS in sampling?", a:"A condition that causes a sample to be unrepresentative of the population from which it came. Two primary causes: random sampling error and selection bias."},
+  {ch:"Ch 8", q:"What is RANDOM SAMPLING ERROR?", a:"The difference between the results the researcher gets from the sample and what the results might have been had the entire population been polled. Samples from highly diverse populations tend to have more sampling error."},
+  {ch:"Ch 8", q:"What is SELECTION BIAS?", a:"Any process that systematically increases or decreases the chances that certain members of a population will be selected into the sample. Ideally, all members should have an equal chance of being selected."},
+  {ch:"Ch 8", q:"What is a sample's LEVEL OF PRECISION?", a:"A measure of a sample's representativeness to the population from which it came. Determined by: (1) size of sample relative to population size, (2) diversity within the population, and (3) frequency at which the phenomenon occurs in the population."},
+  {ch:"Ch 8", q:"What are the 2 major types of sampling?", a:"1) Probability sampling — relies on RANDOM selection; allows researchers to predict about the population from the sample\n2) Non-Probability sampling — does NOT rely on random selection; cannot predict about the population."},
+  {ch:"Ch 8", q:"What is SIMPLE RANDOM SAMPLING?", a:"A researcher randomly selects cases into a sample directly from a population. Each member must have an EQUAL and NON-ZERO chance of being selected."},
+  {ch:"Ch 8", q:"What is SYSTEMATIC RANDOM SAMPLING?", a:"A researcher uses a structured process to randomly select cases. Example: selecting every 10th case from the population."},
+  {ch:"Ch 8", q:"What is STRATIFIED RANDOM SAMPLING?", a:"A form of multi-stage sampling. Researchers create groupings (strata) within the population, then randomly select cases from each stratum until an appropriate-sized sample is collected."},
+  {ch:"Ch 8", q:"What is CLUSTER SAMPLING?", a:"A form of multi-stage sampling. Researchers identify natural groupings (clusters) within the population. Some clusters are randomly selected, then cases are randomly selected from those clusters until an appropriate sample is collected."},
+  {ch:"Ch 8", q:"What are the advantages of NON-PROBABILITY sampling?", a:"1) Allows researchers to take advantage of a long-term association with research subjects\n2) A sampling frame may not be available\n3) Allows researchers to study distinctive or generally inaccessible research subjects."},
+  {ch:"Ch 8", q:"What is a CONVENIENCE (AVAILABILITY) SAMPLE?", a:"Created when a researcher selects a sample from a group of people who are at hand or easily available. Also known as an availability sample."},
+  {ch:"Ch 8", q:"What is SNOWBALL SAMPLING?", a:"Relies on sample members themselves to increase the sample size. After one member is identified, the researcher asks that member to identify other members of the population. The process repeats until the sample is large enough."},
+  {ch:"Ch 8", q:"What are CASE STUDIES?", a:"Highly detailed inquiries into or descriptions of a population or phenomenon where the sample can be a single case. Two types: typical case sample and extreme case sample."},
+];
+
+// State
+let activeChapters = new Set(['All']);
+let deck = [];
+let idx = 0;
+let isFlipped = false;
+let scores = { got: 0, almost: 0, missed: 0 };
+let shuffle = true;
+
+const chapters = ['All', 'Ch 1', 'Ch 2', 'Ch 3', 'Ch 4', 'Ch 5', 'Ch 6', 'Ch 7', 'Ch 8'];
+
+function buildFilter() {
+  const wrap = document.getElementById('chapterFilter');
+  chapters.forEach(ch => {
+    const btn = document.createElement('button');
+    btn.className = 'ch-btn' + (ch === 'All' ? ' active' : '');
+    btn.textContent = ch === 'All' ? `All (${ALL_CARDS.length})` : `${ch} (${ALL_CARDS.filter(c=>c.ch===ch).length})`;
+    btn.onclick = () => toggleChapter(ch, btn);
+    wrap.appendChild(btn);
+  });
+}
+
+function toggleChapter(ch, btn) {
+  if (ch === 'All') {
+    activeChapters = new Set(['All']);
+    document.querySelectorAll('.ch-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+  } else {
+    activeChapters.delete('All');
+    document.querySelectorAll('.ch-btn')[0].classList.remove('active');
+    if (activeChapters.has(ch)) {
+      activeChapters.delete(ch);
+      btn.classList.remove('active');
+      if (activeChapters.size === 0) { activeChapters.add('All'); document.querySelectorAll('.ch-btn')[0].classList.add('active'); }
+    } else {
+      activeChapters.add(ch);
+      btn.classList.add('active');
+    }
+  }
+  resetDeck();
+}
+
+function buildDeck() {
+  let cards = activeChapters.has('All') ? [...ALL_CARDS] : ALL_CARDS.filter(c => activeChapters.has(c.ch));
+  if (document.getElementById('shuffleToggle').checked) {
+    for (let i = cards.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [cards[i], cards[j]] = [cards[j], cards[i]];
+    }
+  }
+  deck = cards;
+  idx = 0;
+  scores = { got: 0, almost: 0, missed: 0 };
+}
+
+function showCard() {
+  if (deck.length === 0) return;
+  const c = deck[idx];
+  document.getElementById('cardChapter').textContent = c.ch;
+  document.getElementById('cardChapterBack').textContent = c.ch;
+  document.getElementById('cardFront').textContent = c.q;
+  document.getElementById('cardBack').innerHTML = c.a.replace(/\n/g, '<br>');
+  document.getElementById('card').classList.remove('flipped');
+  document.getElementById('scoreRow').classList.remove('visible');
+  isFlipped = false;
+  updateProgress();
+  updateStats();
+}
+
+function flipCard() {
+  isFlipped = !isFlipped;
+  document.getElementById('card').classList.toggle('flipped', isFlipped);
+  document.getElementById('scoreRow').classList.toggle('visible', isFlipped);
+}
+
+function score(type) {
+  scores[type]++;
+  nextCard();
+}
+
+function nextCard() {
+  if (idx < deck.length - 1) {
+    idx++;
+    showCard();
+  } else {
+    document.getElementById('cardFront').innerHTML = `<strong>🎉 Deck complete!</strong><br><br>Got it: ${scores.got} · Almost: ${scores.almost} · Missed: ${scores.missed}<br><br>Tap Reset to go again.`;
+    document.getElementById('cardBack').textContent = '';
+    document.getElementById('card').classList.remove('flipped');
+    document.getElementById('scoreRow').classList.remove('visible');
+    updateProgress();
+    updateStats();
+  }
+}
+
+function prevCard() {
+  if (idx > 0) { idx--; showCard(); }
+}
+
+function resetDeck() {
+  buildDeck();
+  showCard();
+}
+
+function updateProgress() {
+  const total = deck.length;
+  const pct = total ? ((idx / total) * 100) : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${idx + 1} / ${total}`;
+}
+
+function updateStats() {
+  document.getElementById('gotCount').textContent = scores.got;
+  document.getElementById('almostCount').textContent = scores.almost;
+  document.getElementById('missedCount').textContent = scores.missed;
+}
+
+document.getElementById('shuffleToggle').addEventListener('change', resetDeck);
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
+  if (e.key === 'ArrowRight') nextCard();
+  if (e.key === 'ArrowLeft') prevCard();
+  if (e.key === '1' && isFlipped) score('got');
+  if (e.key === '2' && isFlipped) score('almost');
+  if (e.key === '3' && isFlipped) score('missed');
+});
+
+buildFilter();
+resetDeck();
+</script>
+
+<p style="font-size:0.7rem;color:#4a4a6a;text-align:center;margin-top:12px;">
+  Space/Enter = flip · ← → = navigate · 1 = Got it · 2 = Almost · 3 = Missed
+</p>
+
+</body>
+</html>
